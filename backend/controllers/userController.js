@@ -1,8 +1,11 @@
 import User from "../models/userModels.js"
 import bcrypt from 'bcryptjs'
+import jwt from 'jsonwebtoken'
 
 //create jwt
-
+const createToken = (id) => {
+    return jwt.sign({id}, process.env.JWT, { expiresIn: "10d" })
+}
 
 export const registerUser = async (req,res) => {
     const {email, password} = req.body;
@@ -21,7 +24,8 @@ export const registerUser = async (req,res) => {
 
     try{
         const user = await User.create({email, password: hashed})
-        return res.status(201).json({email})
+        const token = createToken(user._id)
+        return res.status(201).json({email, token})
     }catch(error){
         console.error(error);
         return res.status(500).json({error:error.message})
@@ -46,7 +50,8 @@ export const loginUser = async (req,res) => {
     }
 
     try{
-        return res.status(200).json({email})
+        const token = createToken(user._id)
+        return res.status(200).json({email, token})
     }catch(error){
         return res.status(500).json({error:error.message})
     }
