@@ -1,4 +1,5 @@
 import User from "../models/userModels.js"
+import bcrypt from 'bcryptjs'
 
 export const registerUser = async (req,res) => {
     const {email, password} = req.body;
@@ -12,8 +13,11 @@ export const registerUser = async (req,res) => {
         return res.status(400).json({error: "email is taken"})
     }
 
+    const salt = await bcrypt.genSalt()
+    const hashed = await bcrypt.hash(password, salt)
+
     try{
-        const user = await User.create({email, password})
+        const user = await User.create({email, password: hashed})
         return res.status(201).json({email})
     }catch(error){
         console.error(error);
